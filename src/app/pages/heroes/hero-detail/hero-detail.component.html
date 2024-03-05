@@ -1,0 +1,18 @@
+<app-item-detail
+  [item]="hero"
+  [imageDefault]="DEFAULT_IMAGE"
+  [isHero]="true"
+  (emitAddWeapon)="listenWeapons()"
+  (emitAddArmor)="listenArmors()"
+></app-item-detail>
+<app-list-item
+  *ngIf="weapons && isWeapon"
+  [items]="weapons"
+  (onClickItem)="addWeapon($event)"
+></app-list-item>
+
+<app-list-item
+  *ngIf="armors && isArmor"
+  [items]="armors"
+  (onClickItem)="addArmor($event)"
+></app-list-item>
