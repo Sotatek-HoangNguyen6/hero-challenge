@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
 import { ARMORS } from '../../core/constants/mock-data';
 import { Armor } from '../../core/models/armor';
 
@@ -7,13 +6,12 @@ import { Armor } from '../../core/models/armor';
   providedIn: 'root',
 })
 export class ArmorService {
-  getArmors(): Observable<Armor[]> {
-    const armors = of(ARMORS);
-    return armors;
+  getArmors(): Armor[] {
+    return ARMORS;
   }
 
-  getArmor(id: number): Observable<Armor> {
+  getArmor(id: number): Armor {
     const armor = ARMORS.find((armor) => armor.id === id)!;
-    return of(armor);
+    return armor;
   }
 }

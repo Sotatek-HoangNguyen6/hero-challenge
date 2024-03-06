@@ -18,33 +18,42 @@ h2 {
   align-items: flex-start;
 }
 
+.heroes-menu img {
+  height: 80px;
+  width: auto;
+}
+
 a {
   background-color: #3f525c;
-  border-radius: 2px;
+  border-radius: 10px;
   padding: 1rem;
-  font-size: 1.2rem;
-  text-decoration: none;
-  display: inline-block;
   color: #fff;
   text-align: center;
-  width: 100%;
-  min-width: 70px;
-  margin: .5rem auto;
-  box-sizing: border-box;
-
-  /* flexbox */
-  order: 0;
-  flex: 0 1 auto;
-  align-self: auto;
 }
 
 @media (min-width: 600px) {
   a {
-    width: 18%;
+    width: 10%;
     box-sizing: content-box;
   }
 }
 
 a:hover {
   background-color: #000;
+}
+.hero-fighting {
+  text-align: center;
+}
+.board-fighting {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  img {
+    height: 60px;
+    width: auto;
+  }
+}
+#imageCanvas {
+  height: 675px;
+  width: 900px;
 }

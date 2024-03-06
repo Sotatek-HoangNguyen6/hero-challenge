@@ -3,19 +3,14 @@
   <h2>{{ item.name }} details</h2>
   <div class="item-detail">
     <div class="item-img">
-      <img [src]="item.imageSrc || imageDefault" width="100%" />
+      <img [src]="item.imageSrc" width="100%" />
     </div>
     <div class="item-content">
-      <p>id: {{ item.id }}</p>
       <p>Name: {{ item.name }}</p>
       <p>Health: {{ item.health || 0 }}</p>
       <p>Damage: {{ item.damage || 0 }}</p>
     </div>
   </div>
-  @if (isHero) {
-  <button (click)="emitAddWeapon.emit()">Add weapon</button>
-  <button (click)="emitAddArmor.emit()">Add armor</button>
-  }
   <button (click)="goBack()">go back</button>
 </div>
 }

@@ -2,14 +2,38 @@ import { Monster } from '../models/monster';
 
 export const MONSTERS: Monster[] = [
   {
-    id: 1.1,
-    name: 'Monster',
+    id: 1,
+    name: 'Frieza',
     health: 110,
-    damage: 1,
+    damage: 2,
+    imageSrc: 'assets/monsters/frieza.png',
   },
-  { id: 1.2, name: 'Monster', health: 120, damage: 2 },
-  { id: 1.3, name: 'Monster', health: 130, damage: 3 },
-  { id: 1.4, name: 'Monster', health: 140, damage: 4 },
+  {
+    id: 2,
+    name: 'Cell',
+    health: 120,
+    damage: 3,
+    imageSrc: 'assets/monsters/cell.png',
+  },
+  {
+    id: 3,
+    name: 'Maji Bu',
+    health: 130,
+    damage: 4,
+    imageSrc: 'assets/monsters/maji-bu.png',
+  },
+  {
+    id: 4,
+    name: 'Goku Black',
+    health: 140,
+    damage: 5,
+    imageSrc: 'assets/monsters/goku-black.png',
+  },
+  {
+    id: 5,
+    name: 'Beerus',
+    health: 200,
+    damage: 6,
+    imageSrc: 'assets/monsters/beerus.png',
+  },
 ];
-export const DEFAULT_MONSTER_IMAGE =
-  'assets/monsters/imgbin-drawing-chibi-anime-monster-hunter-4-monster-hunter-tri-chibi-YQBdGsJ4uqpahS7Y1YriUihwc.jpeg';

@@ -7,13 +7,12 @@ import { WEAPONS } from '../../core/constants/mock-data';
   providedIn: 'root',
 })
 export class WeaponService {
-  getWeapons(): Observable<Weapon[]> {
-    const weapons = of(WEAPONS);
-    return weapons;
+  getWeapons(): Weapon[] {
+    return WEAPONS;
   }
 
-  getWeapon(id: number): Observable<Weapon> {
+  getWeapon(id: number): Weapon {
     const weapon = WEAPONS.find((weapon) => weapon.id === id)!;
-    return of(weapon);
+    return weapon;
   }
 }

@@ -1,8 +1,29 @@
-<h2>Top Heroes</h2>
+<h2>Heroes</h2>
 <div class="heroes-menu">
-  @for (hero of heroes; track $index) {
-  <a routerLink="/hero/{{ hero.id }}">
-    {{ hero.name }}
+  @for (hero of getHeroes() | async; track $index) {
+  <a (click)="addHero(hero)">
+    <div>{{ hero.name }}</div>
+    <img [src]="hero.imageSrc" alt="" />
   </a>
   }
+</div>
+<div class="hero-fighting">
+  <button class="btn-fight" (click)="fight()">Fight</button>
+</div>
+<div class="board-fighting">
+  <div class="list-hero mt-4r">
+    @for (item of listHero; track $index) {
+    <p>
+      <img [src]="item.imageSrc" alt="" />
+    </p>
+    }
+  </div>
+  <div id="imageCanvas"></div>
+  <div class="list-monster mt-4r">
+    @for (item of monsters; track $index) {
+    <p>
+      <img [src]="item.imageSrc" alt="" />
+    </p>
+    }
+  </div>
 </div>

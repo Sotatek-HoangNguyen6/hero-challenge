@@ -1,28 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
-
 import { HeroService } from '../../../shared/services/hero.service';
 import { Subject, takeUntil } from 'rxjs';
 import { WeaponService } from '../../../shared/services/weapon.service';
 import { ArmorService } from '../../../shared/services/armor.service';
 import { Weapon } from '../../../core/models/weapon';
-import { DEFAULT_IMAGE } from '../../../core/constants/mock-data';
 import { Armor } from '../../../core/models/armor';
 import { Hero } from '../../../core/models/hero';
+import { ItemDetailComponent } from '../../../shared/components/item-detail/item-detail.component';
+import { ListItemComponent } from '../../../shared/components/list-item/list-item.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'app-hero-detail',
   templateUrl: './hero-detail.component.html',
   styleUrls: ['./hero-detail.component.css'],
+  imports: [ItemDetailComponent, ListItemComponent, CommonModule],
 })
 export class HeroDetailComponent implements OnInit {
   hero!: Hero;
   ngUnsubscribe = new Subject<void>();
-  DEFAULT_IMAGE = DEFAULT_IMAGE;
-  isWeapon = false;
   weapons: Weapon[] = [];
-  isArmor = false;
   armors: Armor[] = [];
   constructor(
     private route: ActivatedRoute,
@@ -33,12 +32,14 @@ export class HeroDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.getHero();
+    this.listenArmors();
+    this.listenWeapons();
   }
 
   getHero(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.heroService
-      .getHero(id)
+      .getHeroById(id)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((hero) => (this.hero = hero));
   }
@@ -49,25 +50,11 @@ export class HeroDetailComponent implements OnInit {
   }
 
   listenWeapons(): void {
-    this.isWeapon = true;
-    this.weaponService
-      .getWeapons()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((weapons) => {
-        this.weapons = weapons;
-        this.isArmor = false;
-      });
+    this.weapons = this.weaponService.getWeapons();
   }
 
   listenArmors(): void {
-    this.isArmor = true;
-    this.armorService
-      .getArmors()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((armors) => {
-        this.armors = armors;
-        this.isWeapon = false;
-      });
+    this.armors = this.armorService.getArmors();
   }
 
   addWeapon(weapon: Weapon): void {
@@ -77,7 +64,6 @@ export class HeroDetailComponent implements OnInit {
         ?.damage || 0) +
       weapon.damage;
     this.hero.weaponId = weapon.id;
-    this.isWeapon = false;
   }
 
   addArmor(armor: Armor): void {
@@ -87,6 +73,5 @@ export class HeroDetailComponent implements OnInit {
         0) +
       armor.health;
     this.hero.armorId = armor.id;
-    this.isArmor = false;
   }
 }

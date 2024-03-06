@@ -1,5 +1,5 @@
 <app-list-item
-  [items]="heroes"
+  [items]="getHeroes() | async"
   (onClickItem)="goToDetail($event)"
   title="My heroes"
 ></app-list-item>

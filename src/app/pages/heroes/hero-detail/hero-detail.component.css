@@ -5,7 +5,7 @@ label {
 }
 input {
   font-size: 1em;
-  padding: .5rem;
+  padding: 0.5rem;
 }
 button {
   margin-top: 20px;
@@ -21,4 +21,62 @@ button:disabled {
   background-color: #eee;
   color: #ccc;
   cursor: auto;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+}
+.hero-detail {
+  flex-basis: 100%;
+}
+.weapon-items {
+  flex-basis: 100%;
+  img {
+    height: 65px;
+    width: 65px;
+  }
+}
+.item-detail {
+  cursor: pointer;
+}
+.item-detail:hover {
+  background-color: #eee;
+}
+.armor-items {
+  flex-basis: 100%;
+  img {
+    height: 65px;
+    width: 65px;
+  }
+}
+.item-detail {
+  margin-left: 1rem;
+}
+.item-active {
+  background-color: #ccc;
+}
+
+@media screen and (min-width: 524px) {
+  .hero-detail {
+    flex-basis: 45%;
+  }
+  .weapon-items {
+    flex-basis: 55%;
+  }
+  .armor-items {
+    flex-basis: 55%;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .hero-detail {
+    flex-basis: 30%;
+  }
+  .weapon-items {
+    flex-basis: 35%;
+  }
+  .armor-items {
+    flex-basis: 35%;
+  }
 }
