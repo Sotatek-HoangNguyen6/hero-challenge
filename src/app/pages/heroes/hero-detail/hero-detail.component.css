@@ -40,9 +40,7 @@ button:disabled {
 .item-detail {
   cursor: pointer;
 }
-.item-detail:hover {
-  background-color: #eee;
-}
+
 .armor-items {
   flex-basis: 100%;
   img {

@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HeroService } from '../../shared/services/hero.service';
 import { Hero } from '../../core/models/hero';
 import { RouterModule } from '@angular/router';
 import { Monster } from '../../core/models/monster';
 import { BattleService } from '../../shared/services/battle.service';
-import { Observable, delay, filter } from 'rxjs';
+import { Subject, filter, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { Item } from '../../core/models/item';
 
 @Component({
   standalone: true,
@@ -13,10 +14,13 @@ import { CommonModule } from '@angular/common';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
   imports: [RouterModule, CommonModule],
+  providers: [BattleService],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  heroes: Hero[] = [];
   monsters: Monster[] = [];
   listHero: Hero[] = [];
+  ngUnsubscribe = new Subject<void>();
 
   constructor(
     private heroService: HeroService,
@@ -27,10 +31,27 @@ export class DashboardComponent implements OnInit {
     this.getHeroes();
     this.listenFighting();
     this.battleService.initStageCanvas();
+    this.listenFinishedBattle();
   }
 
-  getHeroes(): Observable<Hero[]> {
-    return this.heroService.getHeroes();
+  listenFinishedBattle(): void {
+    this.battleService.isFinished$
+      .pipe(
+        filter((isFinished) => !!isFinished),
+        takeUntil(this.ngUnsubscribe)
+      )
+      .subscribe(() => {
+        //reset list data fight
+        this.listHero = [];
+        this.monsters = [];
+      });
+  }
+
+  getHeroes(): void {
+    this.heroService
+      .getHeroes()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((heroes) => (this.heroes = heroes));
   }
 
   addHero(hero: Hero): void {
@@ -38,35 +59,32 @@ export class DashboardComponent implements OnInit {
     if (this.listHero.some((item) => hero.id === item.id)) {
       return;
     }
-    this.battleService.addImageLayer();
     this.listHero.push(hero);
     this.monsters.push(this.heroService.getMonster(this.listHero.length - 1));
+    this.battleService.addImageLayer();
   }
 
-  fight(): void {
-    // save data to reset data before fight
-    // const baseData = {
-    //   heroes: this.heroService.heroes$.getValue(),
-    //   monsters: this.heroService.monsters$.getValue(),
-    // };
-    // localStorage.setItem('baseData', JSON.stringify(baseData));
-    this.battleService.startBattle$.next({
-      listHero: this.listHero,
-      monsters: this.monsters,
-    });
+  startBattle(): void {
+    this.battleService.startBattle(this.listHero, this.monsters);
+    this.heroService.updateBaseData();
   }
 
   listenFighting(): void {
     this.battleService.startBattle$
       .pipe(
-        filter((nextfight) => !!nextfight),
-        delay(200)
+        filter((newItem) => !!newItem),
+        takeUntil(this.ngUnsubscribe)
       )
-      .subscribe((newItem: any) => {
+      .subscribe((newItem: Item) => {
         this.battleService.updateBattle$.next({
           listHero: newItem?.listHero,
           monsters: newItem?.monsters,
         });
       });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

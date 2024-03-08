@@ -89,6 +89,10 @@ input[type="text"] {
   display: flex;
 }
 
+.justify-content-between {
+  justify-content: space-between;
+}
+
 .mt-4r {
   margin-top: 4rem;
 }

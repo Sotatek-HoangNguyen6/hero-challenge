@@ -20,9 +20,10 @@ import { CommonModule } from '@angular/common';
 })
 export class HeroDetailComponent implements OnInit {
   hero!: Hero;
-  ngUnsubscribe = new Subject<void>();
   weapons: Weapon[] = [];
   armors: Armor[] = [];
+  ngUnsubscribe = new Subject<void>();
+
   constructor(
     private route: ActivatedRoute,
     private heroService: HeroService,
@@ -31,47 +32,51 @@ export class HeroDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getHero();
-    this.listenArmors();
-    this.listenWeapons();
-  }
-
-  getHero(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.heroService
       .getHeroById(id)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((hero) => (this.hero = hero));
+    this.weapons = this.weaponService.get();
+    this.armors = this.armorService.get();
+  }
+
+  updateWeapon(weapon: Weapon, isEquip: boolean): void {
+    if (isEquip) {
+      this.hero.damage =
+        (this.hero?.damage || 0) -
+        (this.weaponService.getItemById(this.hero?.weaponId || 0)?.damage ||
+          0) +
+        weapon.damage;
+      this.hero.weaponId = weapon.id;
+    } else {
+      this.hero.damage =
+        (this.hero?.damage || 0) -
+          this.weaponService.getItemById(this.hero?.weaponId || 0)?.damage || 0;
+      this.hero.weaponId = undefined;
+    }
+    this.heroService.updateHero(this.hero);
+  }
+
+  updateArmor(armor: Armor, isEquip: boolean): void {
+    if (isEquip) {
+      this.heroService.updateHero(this.hero);
+      this.hero.health =
+        (this.hero?.health || 0) -
+        (this.armorService.getItemById(this.hero?.armorId || 0)?.health || 0) +
+        armor.health;
+      this.hero.armorId = armor.id;
+    } else {
+      this.hero.health =
+        (this.hero?.health || 0) -
+          this.armorService.getItemById(this.hero?.armorId || 0)?.health || 0;
+      this.hero.armorId = undefined;
+    }
+    this.heroService.updateHero(this.hero);
   }
 
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
-  }
-
-  listenWeapons(): void {
-    this.weapons = this.weaponService.getWeapons();
-  }
-
-  listenArmors(): void {
-    this.armors = this.armorService.getArmors();
-  }
-
-  addWeapon(weapon: Weapon): void {
-    this.hero.damage =
-      (this.hero?.damage || 0) -
-      (this.weapons.find((weapon) => this.hero?.weaponId === weapon.id)
-        ?.damage || 0) +
-      weapon.damage;
-    this.hero.weaponId = weapon.id;
-  }
-
-  addArmor(armor: Armor): void {
-    this.hero.health =
-      (this.hero?.health || 0) -
-      (this.armors.find((armor) => this.hero?.armorId === armor.id)?.health ||
-        0) +
-      armor.health;
-    this.hero.armorId = armor.id;
   }
 }

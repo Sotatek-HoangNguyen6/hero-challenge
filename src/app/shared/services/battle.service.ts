@@ -1,41 +1,50 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, delay } from 'rxjs';
-import { isEmpty } from 'lodash';
+import { BehaviorSubject, delay, filter, interval, take } from 'rxjs';
+import { isUndefined } from 'lodash';
 import { Hero } from '../../core/models/hero';
 import { Monster } from '../../core/models/monster';
 import Konva from 'konva';
 import { Group } from 'konva/lib/Group';
 import { HeroService } from './hero.service';
+import { WeaponService } from './weapon.service';
+import { Item } from '../../core/models/item';
 
 const BACKGROUND_DEFAULT = 'assets/background/background.jpg';
-
-@Injectable({
-  providedIn: 'root',
-})
+const WEAPON_DEFAULT = 'assets/skill/default-weapon.png';
+const TIME_CALCULATE = 1000;
+@Injectable()
 export class BattleService {
-  updateBattle$ = new BehaviorSubject({});
-  startBattle$ = new BehaviorSubject({});
-  layer$: BehaviorSubject<any> = new BehaviorSubject({});
+  updateBattle$: BehaviorSubject<Item> = new BehaviorSubject({} as Item);
+  startBattle$: BehaviorSubject<Item> = new BehaviorSubject({} as Item);
+  isFinished$ = new BehaviorSubject(false);
   stage: any;
   layer = new Konva.Layer();
   heroGroup = new Konva.Group({
     x: 50,
     y: 40,
   });
-  bloodHeroGroup = new Konva.Group({
-    x: 0,
-    y: 0,
+  heroWeaponGroup = new Konva.Group({
+    x: 100,
+    y: 100,
   });
   monsterGroup = new Konva.Group({
-    x: 600,
+    x: 650,
     y: 40,
   });
-  bloodMonsterGroup = new Konva.Group({
-    x: 0,
-    y: 0,
+  monsterWeaponGroup = new Konva.Group({
+    x: 600,
+    y: 125,
   });
 
-  constructor(private heroService: HeroService) {
+  messageGroup = new Konva.Group({
+    x: 350,
+    y: 210,
+  });
+
+  constructor(
+    private heroService: HeroService,
+    private weaponService: WeaponService
+  ) {
     this.listenUpdateBattle();
   }
 
@@ -48,6 +57,105 @@ export class BattleService {
       height: height,
     });
   }
+
+  listenUpdateBattle(): void {
+    this.updateBattle$
+      .pipe(
+        filter(
+          (item: Item) =>
+            !isUndefined(item.listHero) && !isUndefined(item.monsters)
+        ),
+        delay(TIME_CALCULATE)
+      )
+      .subscribe((item: Item) => {
+        // if empty heroes or monters will ended battle
+        // will destroy monster and heroes
+        this.heroGroup.destroy();
+        this.monsterGroup.destroy();
+        if (!item.listHero.length || !item.monsters.length) {
+          this.isFinished$.next(true);
+          !item.listHero.length
+            ? this.drawMessage('Lose', false)
+            : this.drawMessage('Victory', true);
+          this.heroService.reset();
+          return;
+        }
+        // draw first hero in to image
+        const firstHero = item.listHero[0];
+        this.drawCharacter(
+          firstHero?.imageSrc || '',
+          this.heroGroup,
+          firstHero.health
+        );
+        const getWeaponImage = this.weaponService.getItemById(
+          firstHero?.weaponId || 0
+        );
+        this.drawWeapon(
+          this.heroWeaponGroup,
+          100,
+          600,
+          false,
+          getWeaponImage?.imageSrc
+        );
+
+        // draw first monster of monsters in to image
+        let firstMonster = item.monsters[0];
+        this.drawCharacter(
+          firstMonster?.imageSrc || '',
+          this.monsterGroup,
+          firstMonster.health
+        );
+        this.drawWeapon(this.monsterWeaponGroup, 600, 100, true, undefined);
+
+        // calculate dame and health for hero and monster
+        firstHero.health = firstHero.health - firstMonster.damage;
+        firstMonster.health = firstMonster.health - firstHero.damage;
+
+        // remove hero and monster
+        // if both of them have under 0 health
+        if (firstHero.health <= 0 && firstMonster.health <= 0) {
+          this.startBattle$.next({
+            listHero: this.removeItems(firstHero, item.listHero),
+            monsters: this.removeItems(firstMonster, item.monsters),
+          });
+          return;
+        }
+
+        // remove hero if he has under 0 health
+        if (firstHero.health <= 0) {
+          this.startBattle$.next({
+            listHero: this.removeItems(firstHero, item.listHero),
+            monsters: item.monsters,
+          });
+          return;
+        }
+
+        // remove monster if he has under 0 health
+        if (firstMonster.health <= 0) {
+          this.startBattle$.next({
+            listHero: item.listHero,
+            monsters: this.removeItems(firstMonster, item.monsters),
+          });
+          return;
+        }
+        // set hero and monster after to calculate and continue battle
+        item.listHero[0] = firstHero;
+        item.monsters[0] = firstMonster;
+        this.startBattle$.next({
+          listHero: item.listHero,
+          monsters: item.monsters,
+        });
+      });
+  }
+
+  startBattle(listHero: Hero[], monsters: Monster[]): void {
+    this.isFinished$.next(false);
+    this.startBattle$.next({
+      listHero: listHero,
+      monsters: monsters,
+    });
+  }
+
   /*
    * Draw background image layer
    */
@@ -66,39 +174,29 @@ export class BattleService {
     this.stage.add(this.layer);
   }
 
-  drawHero(imageObj: any, health: number): void {
-    this.drawBlood(this.heroGroup, this.bloodHeroGroup, health);
-    const heroImg = new Konva.Image({
+  /*
+   * Draw character like hero or monster
+   */
+  drawCharacter(characterImageSrc: string, group: Group, health: number) {
+    const imageObj = new Image();
+    imageObj.src = characterImageSrc;
+    const imageLayer = new Konva.Image({
       image: imageObj,
       x: 50,
       y: 250,
       width: 100,
       height: 250,
     });
-    // TODO add animation for skill of hero belongs to weaponId
-    this.heroGroup.add(heroImg);
-    this.heroGroup.on('click', () => {
-      this.heroGroup.destroy();
-    });
-    this.layer.add(this.heroGroup);
-    this.stage.add(this.layer);
-  }
-  drawMonster(imageObj: any, health: number): void {
-    this.drawBlood(this.monsterGroup, this.bloodMonsterGroup, health);
-    const monsterImg = new Konva.Image({
-      image: imageObj,
-      x: 50,
-      y: 250,
-      width: 100,
-      height: 250,
-    });
-    // TODO add animation for skill of monster
-    this.monsterGroup.add(monsterImg);
-    this.layer.add(this.monsterGroup);
+    this.drawBlood(group, health);
+    group.add(imageLayer);
+    this.layer.add(group);
     this.stage.add(this.layer);
   }
 
-  drawBlood(parentGroup: Group, group: Group, width?: number): void {
+  /*
+   * Draw blood of monster or hero when they are fighting
+   */
+  drawBlood(parentGroup: Group, width?: number): void {
     let colorhealth = 'green';
     if (width && width < 50) {
       colorhealth = 'red';
@@ -120,78 +218,81 @@ export class BattleService {
       padding: 5,
       fill: 'white',
     });
-    group.add(bloodColumn);
-    group.add(text);
-    parentGroup.add(group);
+    parentGroup.add(bloodColumn);
+    parentGroup.add(text);
   }
 
-  resetData(): void {
-    // this.heroService.reset();
-  }
-
-  listenUpdateBattle(): void {
-    this.updateBattle$.pipe(delay(500)).subscribe((item: any) => {
-      // if empty heroes or monters will ended battle
-      // will destroy monster and heroes
-      if (isEmpty(item.listHero) || isEmpty(item.monsters)) {
-        this.heroGroup.destroy();
-        this.monsterGroup.destroy();
-        this.resetData();
-        return;
-      }
-      // draw first hero in to image
-      const firstHero = item.listHero[0];
-      const imageHero = new Image();
-      imageHero.src = firstHero.imageSrc;
-      this.heroGroup.destroy();
-      this.drawHero(imageHero, firstHero.health);
-
-      // draw first monster of monsters in to image
-      let firstMonster = item.monsters[0];
-      const imageMonster = new Image();
-      imageMonster.src = firstMonster.imageSrc;
-      this.monsterGroup.destroy();
-      this.drawMonster(imageMonster, firstMonster.health);
-
-      // calculate dame and health for hero and monster
-      firstHero.health = firstHero.health - firstMonster.damage;
-      firstMonster.health = firstMonster.health - firstHero.damage;
-
-      // remove hero and monster
-      // if both of them have under 0 health
-      if (firstHero.health <= 0 && firstMonster.health <= 0) {
-        this.startBattle$.next({
-          listHero: this.removeItems(firstHero, item.listHero),
-          monsters: this.removeItems(firstMonster, item.monsters),
-        });
-        return;
-      }
-
-      // remove hero if he has under 0 health
-      if (firstHero.health <= 0) {
-        this.startBattle$.next({
-          listHero: this.removeItems(firstHero, item.listHero),
-          monsters: item.monsters,
-        });
-        return;
-      }
-
-      // remove monster if he has under 0 health
-      if (firstMonster.health <= 0) {
-        this.startBattle$.next({
-          listHero: item.listHero,
-          monsters: this.removeItems(firstMonster, item.monsters),
-        });
-        return;
-      }
-      // set hero and monster after to calculate and continue battle
-      item.listHero[0] = firstHero;
-      item.monsters[0] = firstMonster;
-      this.startBattle$.next({
-        listHero: item.listHero,
-        monsters: item.monsters,
-      });
+  /*
+   * Draw weapon for character
+   * actually, use skill like fireball, hakai,...
+   */
+  drawWeapon(
+    group: Group,
+    coordinatesStart: number,
+    coordinatesEnd: number,
+    isMonster = false,
+    imageSrc?: string
+  ): void {
+    const imageWeapon = new Image();
+    imageWeapon.src = !!imageSrc ? imageSrc : WEAPON_DEFAULT;
+    const weaponImg = new Konva.Image({
+      image: imageWeapon,
+      x: 70,
+      y: 230,
+      width: 50,
+      height: 50,
     });
+    let start = coordinatesStart;
+    const animationWeapon = new Konva.Animation(() => {
+      if (
+        (!isMonster && group.x() < coordinatesEnd) ||
+        (isMonster && group.x() > coordinatesEnd)
+      ) {
+        isMonster ? (start -= 20) : (start += 20);
+        group.x(start);
+      } else {
+        animationWeapon.stop();
+        start = coordinatesStart;
+        group.destroy();
+        group.x(coordinatesStart);
+      }
+    }, this.layer);
+    interval(TIME_CALCULATE)
+      .pipe(take(1))
+      .subscribe(() => animationWeapon.start());
+    group.add(weaponImg);
+    this.layer.add(group);
+    this.stage.add(this.layer);
+  }
+
+  /*
+   * after fighting, show message victory or lose
+   */
+  drawMessage(message: string, isWin = false): void {
+    const backGround = new Konva.Rect({
+      x: 0,
+      y: 0,
+      width: 200,
+      height: 100,
+      name: message,
+      fill: isWin ? 'green' : 'red',
+    });
+    const text = new Konva.Text({
+      x: 50,
+      y: 30,
+      text: message,
+      fontFamily: 'Calibri',
+      fontSize: 25,
+      padding: 10,
+      fill: 'white',
+    });
+    this.messageGroup.add(backGround);
+    this.messageGroup.add(text);
+    this.messageGroup.on('click', () => {
+      this.messageGroup.destroy();
+    });
+    this.layer.add(this.messageGroup);
+    this.stage.add(this.layer);
   }
 
   removeItems(
