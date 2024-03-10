@@ -4,6 +4,8 @@
 
 Player can choose hero with equip based items then go on fighting with monsters.
 
+Player can remove hero or monster in battle
+
 When victory or lose, Player can continue to play another round
 
 Time used: Idea structure designed 1-2 hours, almost 4 days coding with 2 hours each.
