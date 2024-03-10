@@ -4,7 +4,7 @@ import { Hero } from '../../core/models/hero';
 import { RouterModule } from '@angular/router';
 import { Monster } from '../../core/models/monster';
 import { BattleService } from '../../shared/services/battle.service';
-import { Subject, filter, takeUntil } from 'rxjs';
+import { Subject, combineLatest, filter, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Item } from '../../core/models/item';
 
@@ -81,6 +81,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
           monsters: newItem?.monsters,
         });
       });
+  }
+
+  removeItem(item: Hero | Monster, isHero = false): void {
+    if (isHero) {
+      this.listHero = this.battleService.removeItems(item, this.listHero);
+    } else {
+      this.monsters = this.battleService.removeItems(item, this.monsters);
+    }
   }
 
   ngOnDestroy(): void {

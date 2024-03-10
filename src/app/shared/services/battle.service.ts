@@ -40,7 +40,6 @@ export class BattleService {
     x: 350,
     y: 210,
   });
-
   constructor(
     private heroService: HeroService,
     private weaponService: WeaponService
@@ -82,11 +81,7 @@ export class BattleService {
         }
         // draw first hero in to image
         const firstHero = item.listHero[0];
-        this.drawCharacter(
-          firstHero?.imageSrc || '',
-          this.heroGroup,
-          firstHero.health
-        );
+        this.drawCharacter(firstHero, this.heroGroup);
         const getWeaponImage = this.weaponService.getItemById(
           firstHero?.weaponId || 0
         );
@@ -100,17 +95,12 @@ export class BattleService {
 
         // draw first monster of monsters in to image
         let firstMonster = item.monsters[0];
-        this.drawCharacter(
-          firstMonster?.imageSrc || '',
-          this.monsterGroup,
-          firstMonster.health
-        );
+        this.drawCharacter(firstMonster, this.monsterGroup);
         this.drawWeapon(this.monsterWeaponGroup, 600, 100, true, undefined);
 
         // calculate dame and health for hero and monster
         firstHero.health = firstHero.health - firstMonster.damage;
         firstMonster.health = firstMonster.health - firstHero.damage;
-
         // remove hero and monster
         // if both of them have under 0 health
         if (firstHero.health <= 0 && firstMonster.health <= 0) {
@@ -177,9 +167,9 @@ export class BattleService {
   /*
    * Draw character like hero or monster
    */
-  drawCharacter(characterImageSrc: string, group: Group, health: number) {
+  drawCharacter(character: Hero | Monster, group: Group) {
     const imageObj = new Image();
-    imageObj.src = characterImageSrc;
+    imageObj.src = character.imageSrc || '';
     const imageLayer = new Konva.Image({
       image: imageObj,
       x: 50,
@@ -187,7 +177,7 @@ export class BattleService {
       width: 100,
       height: 250,
     });
-    this.drawBlood(group, health);
+    this.drawBlood(group, character.health);
     group.add(imageLayer);
     this.layer.add(group);
     this.stage.add(this.layer);
