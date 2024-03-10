@@ -1,0 +1,6 @@
+<h1>{{ title }}</h1>
+<nav>
+  @for (navItem of navItems; track $index) {
+  <a [routerLink]="navItem.routerLink">{{ navItem.name }}</a>
+  }
+</nav>

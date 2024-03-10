@@ -1,0 +1,16 @@
+@if (item) {
+<div>
+  <h2>{{ item.name }} details</h2>
+  <div class="item-detail">
+    <div class="item-img">
+      <img [src]="item.imageSrc" width="100%" />
+    </div>
+    <div class="item-content">
+      <p>Name: {{ item.name }}</p>
+      <p>Health: {{ item.health || 0 }}</p>
+      <p>Damage: {{ item.damage || 0 }}</p>
+    </div>
+  </div>
+  <button (click)="goBack()">go back</button>
+</div>
+}

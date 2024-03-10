@@ -1,0 +1,51 @@
+<div class="content">
+  <app-item-detail
+    class="hero-detail"
+    [item]="hero"
+    [isHero]="true"
+  ></app-item-detail>
+  <div class="weapon-items">
+    <h2>Weapons</h2>
+    @for (item of weapons; track $index) {
+    <div
+      [ngClass]="{ 'item-active': item.id === hero.weaponId }"
+      class="item-detail flex align-items-center justify-content-between"
+    >
+      <div class="flex align-items-center">
+        <img [src]="item.imageSrc" />
+        <div class="item-detail">
+          <p>Name: {{ item.name }}</p>
+          <p>Damage: {{ item.damage }}</p>
+        </div>
+      </div>
+      @if (item.id === hero.weaponId) {
+      <button (click)="updateWeapon(item, false)">Unequip</button>
+      } @else {
+      <button (click)="updateWeapon(item, true)">Equip</button>
+      }
+    </div>
+    }
+  </div>
+  <div class="armor-items">
+    <h2>Armors</h2>
+    @for (item of armors; track $index) {
+    <div
+      [ngClass]="{ 'item-active': item.id === hero.armorId }"
+      class="item-detail flex align-items-center justify-content-between"
+    >
+      <div class="flex align-items-center">
+        <img [src]="item.imageSrc" />
+        <div class="item-detail">
+          <p>Name: {{ item.name }}</p>
+          <p>Health: {{ item.health }}</p>
+        </div>
+      </div>
+      @if (item.id === hero.armorId) {
+      <button (click)="updateArmor(item, false)">Unequip</button>
+      } @else {
+      <button (click)="updateArmor(item, true)">Equip</button>
+      }
+    </div>
+    }
+  </div>
+</div>

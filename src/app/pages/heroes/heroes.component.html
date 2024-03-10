@@ -1,0 +1,5 @@
+<app-list-item
+  [items]="getHeroes() | async"
+  (onClickItem)="goToDetail($event)"
+  title="My heroes"
+></app-list-item>

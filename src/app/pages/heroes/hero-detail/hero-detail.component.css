@@ -1,0 +1,80 @@
+/* HeroDetailComponent's private CSS styles */
+label {
+  color: #435960;
+  font-weight: bold;
+}
+input {
+  font-size: 1em;
+  padding: 0.5rem;
+}
+button {
+  margin-top: 20px;
+  background-color: #eee;
+  padding: 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+button:hover {
+  background-color: #cfd8dc;
+}
+button:disabled {
+  background-color: #eee;
+  color: #ccc;
+  cursor: auto;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+}
+.hero-detail {
+  flex-basis: 100%;
+}
+.weapon-items {
+  flex-basis: 100%;
+  img {
+    height: 65px;
+    width: 65px;
+  }
+}
+.item-detail {
+  cursor: pointer;
+}
+
+.armor-items {
+  flex-basis: 100%;
+  img {
+    height: 65px;
+    width: 65px;
+  }
+}
+.item-detail {
+  margin-left: 1rem;
+}
+.item-active {
+  background-color: #ccc;
+}
+
+@media screen and (min-width: 524px) {
+  .hero-detail {
+    flex-basis: 45%;
+  }
+  .weapon-items {
+    flex-basis: 55%;
+  }
+  .armor-items {
+    flex-basis: 55%;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .hero-detail {
+    flex-basis: 30%;
+  }
+  .weapon-items {
+    flex-basis: 35%;
+  }
+  .armor-items {
+    flex-basis: 35%;
+  }
+}

@@ -1,0 +1,59 @@
+/* DashboardComponent's private CSS styles */
+
+h2 {
+  text-align: center;
+}
+
+.heroes-menu {
+  padding: 0;
+  margin: auto;
+  max-width: 1000px;
+
+  /* flexbox */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-content: flex-start;
+  align-items: flex-start;
+}
+
+.heroes-menu img {
+  height: 80px;
+  width: auto;
+}
+
+a {
+  background-color: #3f525c;
+  border-radius: 10px;
+  padding: 1rem;
+  color: #fff;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  a {
+    width: 10%;
+    box-sizing: content-box;
+  }
+}
+
+a:hover {
+  background-color: #000;
+}
+.hero-fighting {
+  text-align: center;
+}
+.board-fighting {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  img {
+    height: 60px;
+    width: auto;
+  }
+}
+#imageCanvas {
+  height: 675px;
+  width: 900px;
+}

@@ -1,0 +1,10 @@
+<h2>{{ title }}</h2>
+<ul class="list-item">
+  @for (item of items; track $index) {
+  <li>
+    <a (click)="onClickItem.emit(item)">
+      <span class="badge">{{ item.id }}</span> {{ item.name }}
+    </a>
+  </li>
+  }
+</ul>

@@ -1,0 +1,29 @@
+<h2>Heroes</h2>
+<div class="heroes-menu">
+  @for (hero of heroes; track $index) {
+  <a (click)="addHero(hero)">
+    <div>{{ hero.name }}</div>
+    <img [src]="hero.imageSrc" alt="" />
+  </a>
+  }
+</div>
+<div class="hero-fighting">
+  <button class="btn-fight" (click)="startBattle()">Fight</button>
+</div>
+<div class="board-fighting">
+  <div class="list-hero mt-4r">
+    @for (item of listHero; track $index) {
+    <p (click)="removeItem(item, true)">
+      <img [src]="item.imageSrc" alt="" />
+    </p>
+    }
+  </div>
+  <div id="imageCanvas"></div>
+  <div class="list-monster mt-4r">
+    @for (item of monsters; track $index) {
+    <p (click)="removeItem(item, false)">
+      <img [src]="item.imageSrc" alt="" />
+    </p>
+    }
+  </div>
+</div>
